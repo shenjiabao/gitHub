@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jk.dao.BookMapper" >
+  <resultMap id="BaseResultMap" type="com.jk.pojo.Book" >
+    <id column="BOOKID" property="bookid" jdbcType="DECIMAL" />
+    <result column="BOOKNAME" property="bookname" jdbcType="VARCHAR" />
+    <result column="BOOKPRICE" property="bookprice" jdbcType="DECIMAL" />
+    <result column="BOOKDATE" property="bookdate" jdbcType="TIMESTAMP" />
+    <result column="BOOKIMG" property="bookimg" jdbcType="VARCHAR" />
+  </resultMap>
+  <!-- 结果集 -->
+  <resultMap type="com.jk.pojo.Book" id="resultMap">
+    <id column="b.BOOKID" property="bookid" jdbcType="DECIMAL" />
+    <result column="b.BOOKNAME" property="bookname" jdbcType="VARCHAR" />
+    <result column="b.BOOKPRICE" property="bookprice" jdbcType="DECIMAL" />
+    <result column="b.BOOKDATE" property="bookdate" jdbcType="TIMESTAMP" />
+    <result column="b.BOOKIMG" property="bookimg" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    BOOKID, BOOKNAME, BOOKPRICE, BOOKDATE, BOOKIMG
+  </sql>
+  <!--  展示字段-->
+  <sql id="Many_Column_List" >
+    bookid as i_id ,bookname as b.BOOKNAME ,bookprice as b.BOOKPRICE,bookdate as b.BOOKDATE,bookimg as b.BOOKIMG
+  </sql>
+  <!--条件查询-->
+  <sql id="where_sql">
+    <where>
+      <trim prefixOverrides="and">
+        <if test="whereMap != null &amp;&amp; whereMap.title != null and whereMap.title != ''">
+          AND bookname LIKE '%${whereMap.title}%'
+        </if>
+      </trim>
+    </where>
+  </sql>
+
+  <!-- book 关联查询list -->
+  <select id="selectBookManyList" resultMap="resultMap" parameterType="com.jk.util.PageUtil">
+    select tt.* from (
+    select t.*,rownum rn from
+    (
+    select <include refid="Many_Column_List"></include> from
+    from T_BOOK
+    <include refid="where_sql"></include>
+    <!-- 排序-->
+    ORDER  BY ${sort} ${order}
+    ) t
+    where rownum &lt;= #{end}
+    ) tt where rn &gt; #{start}
+  </select>
+
+  <!-- book的count -->
+  <select id="selectBookManyListCount" resultType="java.lang.Integer" parameterType="com.jk.util.PageUtil">
+    select count(bookid) from
+    from T_BOOK
+    <include refid="where_sql"></include>
+    <!-- 排序-->
+    ORDER  BY ${sort} ${order}
+  </select>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.math.BigDecimal" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BOOK
+    where BOOKID = #{bookid,jdbcType=DECIMAL}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.math.BigDecimal" >
+    delete from T_BOOK
+    where BOOKID = #{bookid,jdbcType=DECIMAL}
+  </delete>
+  <insert id="insert" parameterType="com.jk.pojo.Book" >
+    insert into T_BOOK (BOOKID, BOOKNAME, BOOKPRICE, 
+      BOOKDATE, BOOKIMG)
+    values (#{bookid,jdbcType=DECIMAL}, #{bookname,jdbcType=VARCHAR}, #{bookprice,jdbcType=DECIMAL}, 
+      #{bookdate,jdbcType=TIMESTAMP}, #{bookimg,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.jk.pojo.Book" >
+    insert into T_BOOK
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="bookid != null" >
+        BOOKID,
+      </if>
+      <if test="bookname != null" >
+        BOOKNAME,
+      </if>
+      <if test="bookprice != null" >
+        BOOKPRICE,
+      </if>
+      <if test="bookdate != null" >
+        BOOKDATE,
+      </if>
+      <if test="bookimg != null" >
+        BOOKIMG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="bookid != null" >
+        #{bookid,jdbcType=DECIMAL},
+      </if>
+      <if test="bookname != null" >
+        #{bookname,jdbcType=VARCHAR},
+      </if>
+      <if test="bookprice != null" >
+        #{bookprice,jdbcType=DECIMAL},
+      </if>
+      <if test="bookdate != null" >
+        #{bookdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="bookimg != null" >
+        #{bookimg,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jk.pojo.Book" >
+    update T_BOOK
+    <set >
+      <if test="bookname != null" >
+        BOOKNAME = #{bookname,jdbcType=VARCHAR},
+      </if>
+      <if test="bookprice != null" >
+        BOOKPRICE = #{bookprice,jdbcType=DECIMAL},
+      </if>
+      <if test="bookdate != null" >
+        BOOKDATE = #{bookdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="bookimg != null" >
+        BOOKIMG = #{bookimg,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where BOOKID = #{bookid,jdbcType=DECIMAL}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jk.pojo.Book" >
+    update T_BOOK
+    set BOOKNAME = #{bookname,jdbcType=VARCHAR},
+      BOOKPRICE = #{bookprice,jdbcType=DECIMAL},
+      BOOKDATE = #{bookdate,jdbcType=TIMESTAMP},
+      BOOKIMG = #{bookimg,jdbcType=VARCHAR}
+    where BOOKID = #{bookid,jdbcType=DECIMAL}
+  </update>
+</mapper>
